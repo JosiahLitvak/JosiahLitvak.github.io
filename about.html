@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About | Josiah Litvak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #111214;
+  --bg2:      #18191C;
+  --bg3:      #1E2024;
+  --bg4:      #25272C;
+  --border:   rgba(212,220,232,0.07);
+  --border-m: rgba(212,220,232,0.13);
+  --white:    #D4DCE8;
+  --muted:    rgba(212,220,232,0.48);
+  --muted2:   rgba(212,220,232,0.22);
+  --blue:     #4F8FE8;
+  --blue-lt:  #7AADE8;
+  --forest:       #2E7D52;
+  --forest-lt:    #3DA06A;
+  --forest-bright:#4DBF7F;
+  --forest-bg:    rgba(46,125,82,0.12);
+  --forest-border:rgba(46,125,82,0.3);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background-color: #111214;
+  background-image:
+    linear-gradient(rgba(79,143,232,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,143,232,0.07) 1px, transparent 1px),
+    linear-gradient(rgba(79,143,232,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,143,232,0.03) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+  color: var(--white);
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--blue); }
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(17,18,20,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--blue-lt); }
+.nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+.nav-links a {
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--blue-lt); }
+.nav-links a.active { color: var(--white); }
+
+/* PAGE HEADER */
+.page-header {
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 2rem 2.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.page-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 0.75rem;
+}
+.page-header h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  color: var(--white);
+}
+.page-header h1 em { color: var(--blue-lt); font-style: normal; }
+
+/* ABOUT LAYOUT */
+.about-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 5rem;
+  align-items: start;
+}
+
+/* BIO */
+.bio-body p {
+  font-size: 1.05rem;
+  color: var(--muted);
+  line-height: 1.85;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+}
+.bio-body p:last-child { margin-bottom: 0; }
+
+.bio-break {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--forest-bright);
+  margin: 2rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.bio-break::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--forest-border);
+}
+
+.pullquote {
+  border-left: 2px solid var(--blue);
+  padding: 0.25rem 0 0.25rem 1.5rem;
+  margin: 2.5rem 0;
+}
+.pullquote p {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: var(--white);
+  margin-bottom: 0 !important;
+}
+
+/* SIDEBAR */
+.about-sidebar {}
+
+.profile-card {
+  background: rgba(24,25,28,0.92);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.75rem;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+  background: var(--bg4);
+  border-radius: 50%;
+  border: 1px solid var(--forest-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 1rem;
+}
+.profile-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.2rem;
+}
+.profile-role {
+  font-size: 0.75rem;
+  color: var(--forest-bright);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+.profile-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1.25rem 0;
+}
+.profile-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  padding: 0.4rem 0;
+}
+.profile-detail .pd-label { color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.68rem; }
+.profile-detail .pd-val { color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-weight: 600; letter-spacing: 0.03em; }
+
+.contact-card {
+  background: rgba(24,25,28,0.92);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.4rem;
+  backdrop-filter: blur(4px);
+}
+.sidebar-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.contact-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+.contact-btn {
+  display: block;
+  width: 100%;
+  padding: 0.65rem;
+  background: var(--blue);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.contact-btn:hover { background: var(--blue-lt); }
+
+.site-border { border-top: 1px solid var(--border); max-width: 1100px; margin: 0 auto; }
+footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.75rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.06em; color: var(--white); text-decoration: none; }
+.footer-logo span { color: var(--blue-lt); }
+.footer-links { display: flex; gap: 1.5rem; list-style: none; }
+.footer-links a { color: var(--muted2); text-decoration: none; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+.footer-copy { font-size: 0.72rem; color: var(--muted2); }
+
+@media (max-width: 800px) {
+  .about-wrap { grid-template-columns: 1fr; gap: 3rem; }
+  .nav-links { display: none; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Josiah <span>Litvak</span></a>
+  <ul class="nav-links">
+    <li><a href="deals.html">Deals</a></li>
+    <li><a href="market.html">Market</a></li>
+    <li><a href="learn.html">Learn</a></li>
+    <li><a href="about.html" class="active">About</a></li>
+  </ul>
+</nav>
+
+<div style="border-bottom: 1px solid var(--border);">
+  <div class="page-header">
+    <p class="page-eyebrow">The person behind the posts</p>
+    <h1>About <em>Josiah</em></h1>
+  </div>
+</div>
+
+<div class="about-wrap">
+  <article class="bio-body">
+    <p>Cleveland born and raised. Real estate wasn't something I chose at 22 after scrolling through an investing podcast. I was 10 years old helping my family flip houses. I saw what it looks like when a deal goes right. I saw what it looks like when it doesn't. I watched people lose money on properties they were convinced were slam dunks. I watched people break even for three years on something they thought would change their life. And I watched people build real wealth, slowly, carefully, because they actually understood what they were buying.</p>
+
+    <div class="bio-break">That stuck with me</div>
+
+    <p>Before I got my license I was in wholesale, finding deals, running numbers, figuring out what a property is actually worth to someone putting real money into it. Not what Zillow says. Not what the seller hopes. What an investor would actually pay.</p>
+
+    <p>Now I'm a licensed Realtor focused on investment properties across Cuyahoga County. I own properties here too, so when we're looking at a deal together, I'm asking the same questions I ask myself.</p>
+
+    <div class="pullquote">
+      <p>If it's a bad deal, I'll tell you it's a bad deal.</p>
+    </div>
+
+    <p>If you're newer to this and you've got that anxious feeling, like you don't want to be the person who buys the wrong thing, I get it. I've seen that play out. I know what the mistakes actually look like. That's the whole point of this site: I tell you what I see, not what sounds good.</p>
+  </article>
+
+  <aside class="about-sidebar">
+    <div class="profile-card">
+      <div class="avatar-lg">👤</div>
+      <div class="profile-name">Josiah Litvak</div>
+      <div class="profile-role">Realtor &middot; Inv. Properties</div>
+      <div class="profile-divider"></div>
+      <div class="profile-detail">
+        <span class="pd-label">Based in</span>
+        <span class="pd-val">Cleveland, OH</span>
+      </div>
+      <div class="profile-detail">
+        <span class="pd-label">Market</span>
+        <span class="pd-val">Cuyahoga County</span>
+      </div>
+      <div class="profile-detail">
+        <span class="pd-label">Focus</span>
+        <span class="pd-val">Investment Properties</span>
+      </div>
+      <div class="profile-detail">
+        <span class="pd-label">Also an</span>
+        <span class="pd-val">Active Investor</span>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <p class="sidebar-label">Work together</p>
+      <p class="contact-text">Looking at a property and want a real read on it? Let's talk.</p>
+      <a href="mailto:" class="contact-btn">Get in touch</a>
+    </div>
+  </aside>
+</div>
+
+<div class="site-border"></div>
+<footer>
+  <a href="index.html" class="footer-logo">Josiah <span>Litvak</span></a>
+  <ul class="footer-links">
+    <li><a href="deals.html">Deals</a></li>
+    <li><a href="market.html">Market</a></li>
+    <li><a href="learn.html">Learn</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <div class="footer-copy">&copy; 2026 Josiah Litvak</div>
+</footer>
+
+</body>
+</html>
