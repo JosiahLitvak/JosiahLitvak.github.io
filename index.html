@@ -485,6 +485,26 @@ footer {
 .footer-links a:hover { color: var(--white); }
 .footer-copy { font-size: 0.72rem; color: var(--muted2); }
 
+/* ── 21st.dev Background Paths ── */
+.masthead-wrap {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+.masthead-wrap .masthead {
+  position: relative;
+  z-index: 2;
+  border-bottom: none;
+}
+.bg-paths-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
 @media (max-width: 800px) {
   .masthead { grid-template-columns: 1fr; }
   .issue-info { text-align: left; }
@@ -508,7 +528,8 @@ footer {
   </ul>
 </nav>
 
-<div style="border-bottom: 1px solid var(--border);">
+<div class="masthead-wrap">
+  <svg class="bg-paths-canvas" id="bgPaths" viewBox="0 0 696 316" fill="none" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
   <div class="masthead">
     <div>
       <p class="masthead-eyebrow">
@@ -645,6 +666,76 @@ function handleSub() {
   btn.disabled = true;
   input.value = '';
 }
+</script>
+<script>
+// ── 21st.dev BackgroundPaths — JS port of framer-motion pathLength/pathOffset ──
+(function () {
+  const svg = document.getElementById('bgPaths');
+  if (!svg) return;
+
+  // Generate 36 paths like the original React component, for both position=1 and position=-1
+  const positions = [1, -1];
+  const allPaths = [];
+
+  positions.forEach(position => {
+    for (let i = 0; i < 36; i++) {
+      const d = `M${-380 - i * 5 * position} ${-189 + i * 6}C${-380 - i * 5 * position} ${-189 + i * 6} ${-312 - i * 5 * position} ${216 - i * 6} ${152 - i * 5 * position} ${343 - i * 6}C${616 - i * 5 * position} ${470 - i * 6} ${684 - i * 5 * position} ${875 - i * 6} ${684 - i * 5 * position} ${875 - i * 6}`;
+      const opacity = 0.04 + i * 0.008;
+      const width = 0.5 + i * 0.03;
+      const color = i % 5 === 0 ? '#4DBF7F' : '#4F8FE8';
+
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      el.setAttribute('d', d);
+      el.setAttribute('stroke', color);
+      el.setAttribute('stroke-width', width);
+      el.setAttribute('fill', 'none');
+      svg.appendChild(el);
+
+      const totalLen = el.getTotalLength ? el.getTotalLength() : 1200;
+
+      allPaths.push({
+        el,
+        totalLen,
+        baseOpacity: opacity,
+        // Each path gets a random duration between 20-30s and random phase offset
+        duration: (20 + Math.random() * 10) * 1000,
+        offset: Math.random() * Math.PI * 2,
+      });
+    }
+  });
+
+  let startTime = null;
+
+  function animate(ts) {
+    if (!startTime) startTime = ts;
+
+    allPaths.forEach(p => {
+      const t = ((ts - startTime + p.offset * 1000) % p.duration) / p.duration; // 0..1 looping
+
+      // Replicate framer-motion:
+      // pathLength animates 0.3 → 1 → 0.3 (visible segment length as fraction)
+      // pathOffset animates 0 → 1 → 0 (position along path)
+      // opacity animates 0.3 → 0.6 → 0.3
+      const pathLength = 0.3 + 0.7 * Math.sin(t * Math.PI);          // 0.3 to 1.0 and back
+      const pathOffset = t;                                              // 0 to 1
+      const opacityMod = 0.08 + 0.12 * Math.sin(t * Math.PI);  // 0.08 to 0.20 to 0.08
+
+      const len = p.totalLen;
+      const segLen = pathLength * len;
+      const start = pathOffset * len;
+
+      // dasharray = visible segment, gap = rest
+      // dashoffset shifts where the pattern starts
+      p.el.setAttribute('stroke-dasharray', `${segLen} ${len - segLen}`);
+      p.el.setAttribute('stroke-dashoffset', -start);
+      p.el.setAttribute('stroke-opacity', opacityMod);
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+})();
 </script>
 </body>
 </html>
