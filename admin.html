@@ -439,7 +439,7 @@ async function rebuildFeeds(){
     const eduPosts=valid.filter(p=>p.type==='edu');
 
     // Helper: wipe and rewrite a page's feed between POSTS_START and next </main> or </div>
-    async function rebuildPage(path, posts, cardFn, isGrid){
+    async function rebuildPage(path, posts, cardFn, endTag){
       showStatus('rebuild','loading',`Rebuilding ${path}...`);
       const file=await apiGet(path);
       const html=decodeB64(file.content);
@@ -447,8 +447,6 @@ async function rebuildFeeds(){
       const mi=html.indexOf(marker);
       if(mi===-1)throw new Error(`POSTS_START marker missing in ${path}`);
       const afterMarker=mi+marker.length;
-      // Find end boundary
-      const endTag=isGrid?'</div>':'</main>';
       const ei=html.indexOf(endTag,afterMarker);
       if(ei===-1)throw new Error(`Could not find end of feed in ${path}`);
       const newCards=posts.map(cardFn).join('\n');
@@ -468,13 +466,13 @@ async function rebuildFeeds(){
     await apiPut('index.html',updatedIndex,indexFile.sha,'Rebuild index feed');
 
     // Rebuild deals.html
-    if(dealPosts.length) await rebuildPage('deals.html',dealPosts,p=>generateSectionCard(p),false);
+    if(dealPosts.length) await rebuildPage('deals.html',dealPosts,p=>generateSectionCard(p),'</div>');
 
     // Rebuild market.html
-    if(marketPosts.length) await rebuildPage('market.html',marketPosts,p=>generateSectionCard(p),false);
+    if(marketPosts.length) await rebuildPage('market.html',marketPosts,p=>generateSectionCard(p),'</main>');
 
     // Rebuild learn.html
-    if(eduPosts.length) await rebuildPage('learn.html',eduPosts,p=>generateSectionCard(p),true);
+    if(eduPosts.length) await rebuildPage('learn.html',eduPosts,p=>generateSectionCard(p),'</div>');
 
     showStatus('rebuild','success',`Done! Rebuilt feeds with ${valid.length} post${valid.length===1?'':'s'}.`);
   }catch(e){showStatus('rebuild','error','Error: '+e.message);}
