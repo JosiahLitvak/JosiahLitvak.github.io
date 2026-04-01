@@ -120,6 +120,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(17,18,20,0.97);backdrop-fi
       <button class="nav-btn" id="btn-edit-posts" onclick="showTab('edit-posts',this);loadPostList()">Posts</button>
       <button class="nav-btn" id="btn-edit-pages" onclick="showTab('edit-pages',this)">Pages</button>
       <a href="visual-editor.html" class="nav-btn" style="text-decoration:none;display:block;">Visual editor ↗</a>
+      <span class="sidebar-section-label">Tools</span>
+      <button class="nav-btn" id="btn-rebuild" onclick="showTab('rebuild',this)">Rebuild feeds</button>
       <span class="sidebar-section-label">Account</span>
       <button class="nav-btn" id="btn-settings" onclick="showTab('settings',this)">Settings</button>
       <button class="nav-btn nav-btn-danger" onclick="logout()">Sign out</button>
@@ -271,6 +273,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(17,18,20,0.97);backdrop-fi
         </div>
       </div>
 
+      <!-- REBUILD FEEDS -->
+      <div class="tab" id="tab-rebuild">
+        <div class="admin-card">
+          <span class="card-label">Rebuild all feeds</span>
+          <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.7;">If posts are missing from the live site — usually after uploading fresh HTML files — this will scan all your published posts and re-inject their cards into the home feed, deals, market, and learn pages. Existing cards are cleared first so there are no duplicates.</p>
+          <button class="btn-primary" id="rebuild-btn" onclick="rebuildFeeds()">Rebuild all feeds now</button>
+          <div class="publish-status" id="rebuild-status"></div>
+        </div>
+      </div>
+
       <!-- SETTINGS -->
       <div class="tab" id="tab-settings">
         <div class="admin-card">
@@ -314,7 +326,7 @@ function toSlug(t){return t.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s
 function formatDate(s){const M=['January','February','March','April','May','June','July','August','September','October','November','December'];const d=new Date(s+'T12:00:00');return`${M[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;}
 function parseDateToInput(str){const M={January:'01',February:'02',March:'03',April:'04',May:'05',June:'06',July:'07',August:'08',September:'09',October:'10',November:'11',December:'12'};const m=str.match(/(\w+)\s+(\d+),\s+(\d+)/);if(!m)return'';return`${m[3]}-${M[m[1]]||'01'}-${String(m[2]).padStart(2,'0')}`;}
 function esc(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function showStatus(scope,type,msg){const ids={new:'new-publish-status',edit:'edit-publish-status',bio:'bio-status',snapshot:'snapshot-status',tagline:'tagline-status',featured:'featured-status'};const el=document.getElementById(ids[scope]);if(!el)return;el.className='publish-status status-'+type;el.innerHTML=type==='loading'?`<div class="spinner"></div>${msg}`:msg;}
+function showStatus(scope,type,msg){const ids={new:'new-publish-status',edit:'edit-publish-status',bio:'bio-status',snapshot:'snapshot-status',tagline:'tagline-status',featured:'featured-status',rebuild:'rebuild-status'};const el=document.getElementById(ids[scope]);if(!el)return;el.className='publish-status status-'+type;el.innerHTML=type==='loading'?`<div class="spinner"></div>${msg}`:msg;}
 async function loadPostList(){const c=document.getElementById('post-list-container');c.innerHTML='<div class="empty-state">Loading...</div>';try{const files=await apiListDir('posts');const htmlFiles=files.filter(f=>f.name.endsWith('.html'));if(!htmlFiles.length){c.innerHTML='<div class="empty-state">No posts yet. Use New Post to publish your first one.</div>';return;}const posts=await Promise.all(htmlFiles.map(async f=>{try{const file=await apiGet(`posts/${f.name}`);const p=parsePostHTML(decodeB64(file.content));return{...p,slug:f.name.replace('.html',''),sha:file.sha};}catch{return{slug:f.name.replace('.html',''),title:f.name,type:'unknown',date:'',sha:''};}}));posts.sort((a,b)=>(b.date||'').localeCompare(a.date||''));c.innerHTML=posts.map(p=>{const tc=p.type==='deal'?'tag-deal-c':p.type==='market'?'tag-market-c':'tag-edu-c';const tl=p.type==='deal'?'Deal':p.type==='market'?'Market':p.type==='edu'?'Education':'';return`<div class="post-list-item"><div style="min-width:0;">${tl?`<div class="post-list-tag ${tc}">${tl}</div>`:''}<div class="post-list-title">${esc(p.title)}</div><div class="post-list-meta">${p.date?formatDate(p.date):''}</div></div><div><button class="btn-secondary" onclick="openPostForEdit('${p.slug}')">Edit</button></div></div>`;}).join('');}catch(e){c.innerHTML=`<div class="empty-state" style="color:var(--red-dim);">Error: ${e.message}</div>`;}}
 function parsePostHTML(html){const doc=new DOMParser().parseFromString(html,'text/html');const title=doc.querySelector('.post-headline')?.textContent.trim()||'';const dateRaw=doc.querySelector('.post-meta')?.textContent.trim()||'';const date=parseDateToInput(dateRaw);const excerpt=doc.querySelector('meta[name="description"]')?.getAttribute('content')||'';const tagEl=doc.querySelector('.post-tag');let type='edu';if(tagEl){if(tagEl.classList.contains('tag-deal'))type='deal';else if(tagEl.classList.contains('tag-market'))type='market';}const body=Array.from(doc.querySelectorAll('.article-body p')).map(p=>p.textContent.trim()).join('\n\n');const stats={capRate:'',grossMo:'',payback:''};doc.querySelectorAll('.deal-stat').forEach(el=>{const val=el.querySelector('.v')?.textContent.trim()||'';const lbl=(el.querySelector('.l')?.textContent.trim()||'').toLowerCase();if(lbl.includes('cap'))stats.capRate=val;else if(lbl.includes('gross'))stats.grossMo=val;else if(lbl.includes('payback'))stats.payback=val;});const verdicts=Array.from(doc.querySelectorAll('.chip')).map(el=>({label:el.textContent.trim(),type:el.classList.contains('chip-green')?'green':el.classList.contains('chip-amber')?'amber':'red'}));return{title,date,excerpt,type,body,stats,verdicts};}
 async function openPostForEdit(slug){document.getElementById('edit-post-list-view').style.display='none';document.getElementById('edit-post-form-view').style.display='block';showStatus('edit','loading','Loading post...');try{const file=await apiGet(`posts/${slug}.html`);const data=parsePostHTML(decodeB64(file.content));curSlug=slug;curSha=file.sha;document.getElementById('edit-title').value=data.title;document.getElementById('edit-excerpt').value=data.excerpt;document.getElementById('edit-date').value=data.date;document.getElementById('edit-body').value=data.body;setType(data.type,'edit');if(data.type==='deal'){document.getElementById('edit-stat-cap').value=data.stats.capRate;document.getElementById('edit-stat-gross').value=data.stats.grossMo;document.getElementById('edit-stat-payback').value=data.stats.payback;document.getElementById('edit-verdicts-list').innerHTML='';editVC=0;data.verdicts.forEach(v=>addVerdict('edit',v.label,v.type));if(!data.verdicts.length)addVerdict('edit');}document.getElementById('edit-publish-status').style.display='none';}catch(e){showStatus('edit','error','Error loading post: '+e.message);}}
@@ -404,6 +416,68 @@ async function removeFeatured(){
     await apiPut('index.html',updated,indexFile.sha,'Remove featured post');
     showStatus('featured','success','Featured post removed.');
   }catch(e){showStatus('featured','error','Error: '+e.message);}
+  btn.disabled=false;
+}
+
+async function rebuildFeeds(){
+  const btn=document.getElementById('rebuild-btn');btn.disabled=true;
+  showStatus('rebuild','loading','Loading all posts...');
+  try{
+    // Load all posts
+    const files=await apiListDir('posts');
+    const htmlFiles=files.filter(f=>f.name.endsWith('.html'));
+    if(!htmlFiles.length){showStatus('rebuild','error','No posts found in posts/ folder.');btn.disabled=false;return;}
+
+    const posts=await Promise.all(htmlFiles.map(async f=>{
+      try{const file=await apiGet(`posts/${f.name}`);const p=parsePostHTML(decodeB64(file.content));return{...p,slug:f.name.replace('.html','')};}
+      catch{return null;}
+    }));
+    const valid=posts.filter(Boolean).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+
+    const dealPosts=valid.filter(p=>p.type==='deal');
+    const marketPosts=valid.filter(p=>p.type==='market');
+    const eduPosts=valid.filter(p=>p.type==='edu');
+
+    // Helper: wipe and rewrite a page's feed between POSTS_START and next </main> or </div>
+    async function rebuildPage(path, posts, cardFn, isGrid){
+      showStatus('rebuild','loading',`Rebuilding ${path}...`);
+      const file=await apiGet(path);
+      const html=decodeB64(file.content);
+      const marker='<!-- POSTS_START -->';
+      const mi=html.indexOf(marker);
+      if(mi===-1)throw new Error(`POSTS_START marker missing in ${path}`);
+      const afterMarker=mi+marker.length;
+      // Find end boundary
+      const endTag=isGrid?'</div>':'</main>';
+      const ei=html.indexOf(endTag,afterMarker);
+      if(ei===-1)throw new Error(`Could not find end of feed in ${path}`);
+      const newCards=posts.map(cardFn).join('\n');
+      const updated=html.slice(0,afterMarker)+'\n'+newCards+'\n'+html.slice(ei);
+      await apiPut(path,updated,file.sha,`Rebuild feed: ${path}`);
+    }
+
+    // Rebuild index (all posts, newest first)
+    showStatus('rebuild','loading','Rebuilding index.html...');
+    const indexFile=await apiGet('index.html');
+    let indexHTML=decodeB64(indexFile.content);
+    const marker='<!-- POSTS_START -->';
+    const mi=indexHTML.indexOf(marker);
+    const ei=indexHTML.indexOf('</main>',mi);
+    const newCards=valid.map(p=>generateIndexCard(p)).join('\n');
+    const updatedIndex=indexHTML.slice(0,mi+marker.length)+'\n'+newCards+'\n'+indexHTML.slice(ei);
+    await apiPut('index.html',updatedIndex,indexFile.sha,'Rebuild index feed');
+
+    // Rebuild deals.html
+    if(dealPosts.length) await rebuildPage('deals.html',dealPosts,p=>generateSectionCard(p),false);
+
+    // Rebuild market.html
+    if(marketPosts.length) await rebuildPage('market.html',marketPosts,p=>generateSectionCard(p),false);
+
+    // Rebuild learn.html
+    if(eduPosts.length) await rebuildPage('learn.html',eduPosts,p=>generateSectionCard(p),true);
+
+    showStatus('rebuild','success',`Done! Rebuilt feeds with ${valid.length} post${valid.length===1?'':'s'}.`);
+  }catch(e){showStatus('rebuild','error','Error: '+e.message);}
   btn.disabled=false;
 }
 </script>
